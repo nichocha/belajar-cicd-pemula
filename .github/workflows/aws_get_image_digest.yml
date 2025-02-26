@@ -1,0 +1,36 @@
+name: Get ECR Image Digest
+
+on:
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  get-image-digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Change this if needed
+
+      - name: Get Image Digest from ECR
+        run: |
+          IMAGE_TAG="latest"
+          REPO_NAME="my-repo"
+
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --repository-name "$REPO_NAME" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --query "imageDetails[0].imageDigest" \
+            --output text)
+
+          echo "Image Digest: $IMAGE_DIGEST"
+          echo "IMAGE_DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
+
+      - name: Use Image Digest in Another Step
+        run: echo "The image digest is $IMAGE_DIGEST"
