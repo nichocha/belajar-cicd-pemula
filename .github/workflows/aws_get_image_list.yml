@@ -16,7 +16,7 @@ jobs:
   list-tags-with-digests:
     runs-on: ubuntu-latest
     outputs:
-      tag_digest_list: ${{ steps.fetch-tags.outputs.tag_digest_list }}
+      tag_digest_list: ${{ steps.fetch-tags.outputs.ecr_data }}
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -38,16 +38,16 @@ jobs:
           echo "Available Tags (Sorted by Date, Latest First):"
           echo "$TAG_DIGEST_LIST" | jq
 
-
           # Save to GitHub Actions output (must be single-line)
           ECR_DATA_ESCAPED=$(echo "$TAG_DIGEST_LIST" | jq -c)
-          echo "ecr_data=$ECR_DATA_ESCAPED" >> $GITHUB_OUTPUT
+          echo "ecr_data=$ECR_DATA_ESCAPED" >> "$GITHUB_OUTPUT"
 
-          # Save to a file for reuse
-          echo "$ECR_DATA" > ecr_data.json
+          # Save to a file for artifact upload
+          echo "$ECR_DATA_ESCAPED" > ecr_data.json
 
       - name: Upload ECR Data as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ecr-data
           path: ecr_data.json
+
