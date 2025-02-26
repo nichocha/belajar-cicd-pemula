@@ -38,4 +38,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: nichcoha/belajar-cicd:latest
+        tags: nichocha/belajar-cicd:latest
