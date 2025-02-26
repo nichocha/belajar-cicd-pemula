@@ -29,8 +29,8 @@ jobs:
 
       - name: Get Image Digest from ECR
         run: |
-          IMAGE_TAG="${{ github.event.inputs.repo }}"
-          REPO_NAME="${{ github.event.inputs.tag }}"
+          REPO_NAME="${{ github.event.inputs.repo }}"
+          IMAGE_TAG="${{ github.event.inputs.tag }}"
 
           IMAGE_DIGEST=$(aws ecr describe-images \
             --repository-name "$REPO_NAME" \
