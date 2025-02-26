@@ -1,0 +1,60 @@
+name: 001-update-workflow-options
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+  workflow_dispatch:
+
+jobs:
+  update-workflow:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch options from API
+        id: fetch
+        run: |
+          RESPONSE=$(curl -s 'https://jsonplaceholder.typicode.com/comments' | jq -c '[.[:5] | .[].name]')
+          echo "Fetched greetings: $RESPONSE"
+          echo "options=$RESPONSE" >> $GITHUB_ENV
+
+      - name: Update workflow file
+        run: |
+          OPTIONS=$(echo ${{ env.options }} | jq -r '. | map("          - " + .) | join("\n")')
+          
+          cat > .github/workflows/dynamic-workflow.yml <<EOL
+name: 002-dynamic-workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Person to greet'
+        default: 'World'
+        required: true
+      greeting:
+        description: 'Choose a greeting'
+        required: true
+        default: 'Hello'
+        type: choice
+        options:
+$OPTIONS
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send greeting
+        run: echo "\${{ github.event.inputs.greeting }} \${{ github.event.inputs.name }}"
+EOL
+
+      - name: Commit updated workflow
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .github/workflows/dynamic-workflow.yml
+          git commit -m "Update workflow options"
+          git push
