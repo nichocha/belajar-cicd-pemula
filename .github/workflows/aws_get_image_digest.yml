@@ -38,7 +38,10 @@ jobs:
             --query "imageDetails[0].imageDigest" \
             --output text)
 
-          echo "Image Digest: $IMAGE_DIGEST"
+          echo "Repo: $REPO_NAME"
+          echo "Tag: $IMAGE_TAG"
+          echo "Image Digest:"
+          echo "$IMAGE_DIGEST"
           echo "IMAGE_DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
 
       - name: Use Image Digest in Another Step
