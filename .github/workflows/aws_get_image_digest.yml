@@ -1,7 +1,7 @@
 name: Get ECR Image Digest
 
 on:
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
     inputs:
       repo:
         description: 'Repo Name:'
@@ -10,22 +10,47 @@ on:
       tag:
         description: 'Tag:'
         required: true
-        default: 'latest'
+        type: choice
+        options:
+          - latest  # Will be replaced dynamically
 
 jobs:
   get-image-digest:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Download ECR Tags Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ecr-tags
+
+      - name: Extract Tags
+        id: extract-tags
+        run: |
+          TAGS=$(cat ecr_tags.json | jq -r '. | join("\n          - ")')
+          echo "Available Tags:"
+          echo "$TAGS"
+          echo "tags=$TAGS" >> "$GITHUB_ENV"
+
+      - name: Update Workflow Dispatch Options
+        run: |
+          WORKFLOW_FILE=".github/workflows/get-ecr-image-digest.yml"
+          sed -i "/options:/,/^        required:/c\        options:\n          - $TAGS" "$WORKFLOW_FILE"
+
+      - name: Commit & Push Changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .github/workflows/get-ecr-image-digest.yml
+          git commit -m "Update workflow dispatch options with latest ECR tags"
+          git push
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2  # Change this if needed
+          aws-region: us-west-2
 
       - name: Get Image Digest from ECR
         run: |
@@ -40,8 +65,7 @@ jobs:
 
           echo "Repo: $REPO_NAME"
           echo "Tag: $IMAGE_TAG"
-          echo "Image Digest:"
-          echo "$IMAGE_DIGEST"
+          echo "Image Digest: $IMAGE_DIGEST"
           echo "IMAGE_DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
 
       - name: Use Image Digest in Another Step
