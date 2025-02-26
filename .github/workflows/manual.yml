@@ -1,4 +1,4 @@
-name: 020-manual-input-workflow
+name: 020-dynamic-input-workflow
 
 on:
   workflow_dispatch:
@@ -8,19 +8,30 @@ on:
         default: 'World'
         required: true
       greeting:
-        description: 'Choose a greeting'
+        description: 'Enter a greeting (Fetched dynamically)'
+        default: ''
         required: true
-        default: 'Hello'
-        type: choice
-        options:
-          - Hello
-          - Hi
-          - Hey
-          - Greetings
 
 jobs:
+  fetch-options:
+    runs-on: ubuntu-latest
+    outputs:
+      greetings: ${{ steps.fetch.outputs.greetings }}
+    steps:
+      - name: Fetch greetings from API
+        id: fetch
+        run: |
+          RESPONSE=$(curl -s 'https://jsonplaceholder.typicode.com/comments' | jq -c '[.[:5] | .[].name]')
+          echo "Fetched greetings: $RESPONSE"
+          echo "greetings=$RESPONSE" >> $GITHUB_ENV
+          echo "::set-output name=greetings::$RESPONSE"
+
   greet:
     runs-on: ubuntu-latest
+    needs: fetch-options
     steps:
+      - name: Display fetched greetings
+        run: echo "Available greetings: ${{ needs.fetch-options.outputs.greetings }}"
+
       - name: Send greeting
         run: echo "${{ github.event.inputs.greeting }} ${{ github.event.inputs.name }}"
