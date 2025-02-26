@@ -47,7 +47,7 @@ jobs:
           echo "$ECR_DATA" > ecr_data.json
 
       - name: Upload ECR Data as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ecr-data
           path: ecr_data.json
