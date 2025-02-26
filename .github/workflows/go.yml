@@ -32,18 +32,34 @@ jobs:
       run: echo "PR_NUMBER=${{ github.event.number }}" >> $GITHUB_ENV
 
        
-      
-    - name: Retrieve or Initialize Sequence Number
-      run: |
-        echo "SEQ_NUMBER=${{ vars.SEQ_NUMBER || 0 }}" >> $GITHUB_ENV
 
+
+    # Step 1: Retrieve Sequence Number (if exists)
+    - name: Restore Sequence Number
+      uses: actions/download-artifact@v4
+      with:
+        name: seq-number
+      continue-on-error: true  # Prevent failure if artifact doesn't exist
+
+    - name: Load or Initialize Sequence Number
+      run: |
+        SEQ_FILE="seq_number.txt"
+        if [ -f "$SEQ_FILE" ]; then
+          SEQ_NUMBER=$(cat $SEQ_FILE)
+        else
+          SEQ_NUMBER=0
+        fi
+        echo "SEQ_NUMBER=$SEQ_NUMBER" >> $GITHUB_ENV
+
+    # Step 2: Increment Sequence Number
     - name: Increment Sequence Number
       run: |
         NEW_SEQ=$((SEQ_NUMBER + 1))
         echo "NEW_SEQ=$NEW_SEQ" >> $GITHUB_ENV
-        echo "NEW_SEQ=$NEW_SEQ" > seq_number.txt
+        echo "$NEW_SEQ" > seq_number.txt
 
-    - name: Persist Sequence Number
+    # Step 3: Persist Incremented Sequence Number
+    - name: Save Sequence Number
       uses: actions/upload-artifact@v4
       with:
         name: seq-number
