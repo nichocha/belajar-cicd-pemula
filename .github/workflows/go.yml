@@ -30,12 +30,6 @@ jobs:
     - name: Extract PR number
       if: github.event_name == 'pull_request'
       run: echo "PR_NUMBER=${{ github.event.number }}" >> $GITHUB_ENV
-    
-    - name: Get Sequence Number count
-      run: |
-        SEQUENCE_NUMBER_KKIBCA=$(curl -s -H "Authorization: token ${{ secrets.PAT_GITHUB }}" \
-        "https://api.github.com/repos/${{ github.repository }}/pulls?state=all" | jq 'length')
-        echo "SEQUENCE_NUMBER_KKIBCA=$SEQUENCE_NUMBER_KKIBCA" >> $GITHUB_ENV
 
     # Step 1: Check if SEQ_NUMBER exists, else initialize it
     - name: Retrieve or Initialize Sequence Number
