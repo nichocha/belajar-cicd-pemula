@@ -33,25 +33,13 @@ jobs:
 
     # Step 1: Check if SEQ_NUMBER exists, else initialize it
     - name: Retrieve or Initialize Sequence Number
-      run: |
-        EXISTING_SEQ=$(gh variable list --json name | jq -r '.[] | select(.name=="SEQ_NUMBER") | .name')
-        if [ -z "$EXISTING_SEQ" ]; then
-          echo "SEQ_NUMBER=100" >> $GITHUB_ENV
-          gh variable set SEQ_NUMBER --body "100"
-        else
-          echo "SEQ_NUMBER=$(gh variable get SEQ_NUMBER)" >> $GITHUB_ENV
-        fi
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: echo "SEQ_NUMBER=${{ vars.SEQ_NUMBER }}" >> $GITHUB_ENV
 
     # Step 2: Increment SEQ_NUMBER
     - name: Increment Sequence Number
       run: |
-        NEW_SEQ=$(( $SEQ_NUMBER + 1 ))
-        echo "NEW_SEQ=$NEW_SEQ" >> $GITHUB_ENV
-        gh variable set SEQ_NUMBER --body "$NEW_SEQ"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_SEQ=$(( $SEQ_NUMBER + 1 ))
+          echo "NEW_SEQ=$NEW_SEQ" >> $GITHUB_ENV
 
     - name: Login to Docker Hub
       uses: docker/login-action@v3
