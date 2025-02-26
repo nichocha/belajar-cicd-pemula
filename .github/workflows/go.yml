@@ -31,15 +31,25 @@ jobs:
       if: github.event_name == 'pull_request'
       run: echo "PR_NUMBER=${{ github.event.number }}" >> $GITHUB_ENV
 
-    # Step 1: Check if SEQ_NUMBER exists, else initialize it
+      
+      
     - name: Retrieve or Initialize Sequence Number
-      run: echo "SEQ_NUMBER=${{ vars.SEQ_NUMBER }}" >> $GITHUB_ENV
+      run: |
+        echo "SEQ_NUMBER=${{ vars.SEQ_NUMBER || 0 }}" >> $GITHUB_ENV
 
-    # Step 2: Increment SEQ_NUMBER
     - name: Increment Sequence Number
       run: |
-          NEW_SEQ=$(( $SEQ_NUMBER + 1 ))
-          echo "NEW_SEQ=$NEW_SEQ" >> $GITHUB_ENV
+        NEW_SEQ=$((SEQ_NUMBER + 1))
+        echo "NEW_SEQ=$NEW_SEQ" >> $GITHUB_ENV
+        echo "NEW_SEQ=$NEW_SEQ" > seq_number.txt
+
+    - name: Persist Sequence Number
+      uses: actions/upload-artifact@v4
+      with:
+        name: seq-number
+        path: seq_number.txt
+
+
 
     - name: Login to Docker Hub
       uses: docker/login-action@v3
