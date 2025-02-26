@@ -2,6 +2,15 @@ name: Get ECR Image Digest
 
 on:
   workflow_dispatch:  # Allows manual trigger
+    inputs:
+      repo:
+        description: 'Repo Name:'
+        default: 'nginx-app-repo'
+        required: true
+      tag:
+        description: 'Tag:'
+        required: true
+        default: 'latest'
 
 jobs:
   get-image-digest:
@@ -24,8 +33,8 @@ jobs:
           REPO_NAME="my-repo"
 
           IMAGE_DIGEST=$(aws ecr describe-images \
-            --repository-name "$REPO_NAME" \
-            --image-ids imageTag="$IMAGE_TAG" \
+            --repository-name "${{ github.event.inputs.repo }}" \
+            --image-ids imageTag="${{ github.event.inputs.tag }}" \
             --query "imageDetails[0].imageDigest" \
             --output text)
 
