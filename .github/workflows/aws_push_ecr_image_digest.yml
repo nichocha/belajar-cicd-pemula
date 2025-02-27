@@ -61,3 +61,21 @@ jobs:
           echo "$FILTERED_RESULT" | jq
 
           echo "filtered_data=$FILTERED_RESULT" >> "$GITHUB_OUTPUT"
+
+            approval-step:
+            
+  approval-step:
+    needs: list-tags-with-digests
+    runs-on: ubuntu-latest
+    environment:
+      name: manual-approval
+    steps:
+      - name: Await Manual Approval
+        run: echo "Image requires manual approval before proceeding."
+
+  continue-after-approval:
+    needs: approval-step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Proceed with Next Steps
+        run: echo "Processing approved image..."
