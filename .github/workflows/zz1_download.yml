@@ -13,6 +13,7 @@ jobs:
           name: my-artifact
           github-token: ${{ github.token }} # token with actions:read permissions on target repo
           repository: ${{ github.repository }}
+          run-id: 13558128080
       
       - name: Display Artifact Output
         run: cat output.txt
