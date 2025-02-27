@@ -35,6 +35,23 @@ jobs:
           aws-region: us-west-2
 
       - name: Docker Images List
+        id: fetch-tags
+        run: |          
+          REPO_NAME="${{ github.event.inputs.repo }}"
+          echo "Fetching tags, digests, and push dates for repository: $REPO_NAME"
+
+          TAG_DIGEST_LIST=$(aws ecr describe-images --repository-name "$REPO_NAME" \
+            --query "sort_by(imageDetails, &imagePushedAt)[*].{Tag: imageTags[0], Digest: imageDigest, Date: imagePushedAt}" \
+            --output json | jq 'reverse')
+
+          echo "Available Tags (Sorted by Date, Latest First):"
+          echo "$TAG_DIGEST_LIST" | jq
+
+          # Save to GitHub Actions output (must be single-line)
+          ECR_DATA_ESCAPED=$(echo "$TAG_DIGEST_LIST" | jq -c)
+          echo "ecr_data=$ECR_DATA_ESCAPED" >> "$GITHUB_OUTPUT"
+
+      - name: Destination Image Digest
         id: filter-tag-digest
         run: |          
           REPO_NAME="${{ github.event.inputs.repo }}"
