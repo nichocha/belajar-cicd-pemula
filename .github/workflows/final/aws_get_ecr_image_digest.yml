@@ -1,0 +1,53 @@
+name: Get ECR Image Digest List
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'Repository Name:'
+        required: true
+        type: choice
+        options:
+          - nginx-app-repo
+          - bar
+          - nicoc/test1
+
+jobs:
+  list-tags-with-digests:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_digest_list: ${{ steps.fetch-tags.outputs.ecr_data }}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Fetch Image Tags with Digests from ECR
+        id: fetch-tags
+        run: |          
+          REPO_NAME="${{ github.event.inputs.repo }}"
+          echo "Fetching tags, digests, and push dates for repository: $REPO_NAME"
+
+          TAG_DIGEST_LIST=$(aws ecr describe-images --repository-name "$REPO_NAME" \
+            --query "sort_by(imageDetails, &imagePushedAt)[*].{Tag: imageTags[0], Digest: imageDigest, Date: imagePushedAt}" \
+            --output json | jq 'reverse')
+
+          echo "Available Tags (Sorted by Date, Latest First):"
+          echo "$TAG_DIGEST_LIST" | jq
+
+          # Save to GitHub Actions output (must be single-line)
+          ECR_DATA_ESCAPED=$(echo "$TAG_DIGEST_LIST" | jq -c)
+          echo "ecr_data=$ECR_DATA_ESCAPED" >> "$GITHUB_OUTPUT"
+
+          # Save to a file for artifact upload
+          echo "$ECR_DATA_ESCAPED" > ecr_data.json
+
+      - name: Upload ECR Data as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecr-data
+          path: ecr_data.json
+
