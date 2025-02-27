@@ -7,8 +7,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
           name: my-artifact
-          github-token: ${{ secrets.PAT_GITHUB }} # token with actions:read permissions on target repo
-      - run: cat output.txt
+          github-token: ${{ github.tkoen }} # token with actions:read permissions on target repo
+          repository: ${{ github.repository }}
+      
+      - name: Display Artifact Output
+        run: cat output.txt
