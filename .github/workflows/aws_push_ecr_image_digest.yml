@@ -41,7 +41,9 @@ jobs:
           DOCKER_TAG="${{ github.event.inputs.docker_tag }}"
           DOCKER_DIGEST="${{ github.event.inputs.docker_digest }}"
           
-          echo "Filtering images in repository: $REPO_NAME with Tag: $DOCKER_TAG and Digest: $DOCKER_DIGEST"
+          echo "Repository: $REPO_NAME"
+          echo "Tag: $DOCKER_TAG" 
+          echo "Digest: $DOCKER_DIGEST"
 
           TAG_DIGEST_LIST=$(aws ecr describe-images --repository-name "$REPO_NAME" \
             --query "sort_by(imageDetails, &imagePushedAt)[*].{Tag: imageTags[0], Digest: imageDigest, Date: imagePushedAt}" \
