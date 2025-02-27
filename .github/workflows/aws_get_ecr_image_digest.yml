@@ -1,4 +1,4 @@
-name: Get ECR Image Digest List
+name: Get ECR Image Digest List test
 
 on:
   workflow_dispatch:
