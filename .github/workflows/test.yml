@@ -13,4 +13,4 @@ jobs:
             gh variable set TEST_VAR --body "Set from workflow"
             gh variable list
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
