@@ -79,17 +79,26 @@ jobs:
 
           echo "filtered_data=$FILTERED_RESULT" >> "$GITHUB_OUTPUT"
             
-  approval-step:
+  approval-1-confirmation:
     needs: list-tags-with-digests
     runs-on: ubuntu-latest
     environment:
-      name: manual-approval
+      name: approval-1
     steps:
-      - name: Await Manual Approval
+      - name: Waiting for Approval 1
         run: echo "Image requires manual approval before proceeding."
 
-  continue-after-approval:
-    needs: approval-step
+  approval-2-confirmation:
+    needs: approval-1-confirmation
+    runs-on: ubuntu-latest
+    environment:
+      name: approval-2
+    steps:
+      - name: Waiting for Approval 2
+        run: echo "Image requires manual approval before proceeding."
+
+  push-to-eks:
+    needs: approval-2-confirmation
     runs-on: ubuntu-latest
     steps:
       - name: Proceed with Next Steps
