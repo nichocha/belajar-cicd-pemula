@@ -11,7 +11,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: my-artifact
-          github-token: ${{ github.tkoen }} # token with actions:read permissions on target repo
+          github-token: ${{ github.token }} # token with actions:read permissions on target repo
           repository: ${{ github.repository }}
       
       - name: Display Artifact Output
