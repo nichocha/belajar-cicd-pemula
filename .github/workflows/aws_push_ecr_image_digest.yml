@@ -61,8 +61,6 @@ jobs:
           echo "$FILTERED_RESULT" | jq
 
           echo "filtered_data=$FILTERED_RESULT" >> "$GITHUB_OUTPUT"
-
-            approval-step:
             
   approval-step:
     needs: list-tags-with-digests
