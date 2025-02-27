@@ -11,6 +11,9 @@ on:
           - nginx-app-repo
           - bar
           - nicoc/test1
+          - VxAccount
+          - VxNotification
+          - VxTransaction
 
 jobs:
   list-tags-with-digests:
