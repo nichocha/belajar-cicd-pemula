@@ -59,6 +59,3 @@ jobs:
           echo "$FILTERED_RESULT" | jq
 
           echo "filtered_data=$FILTERED_RESULT" >> "$GITHUB_OUTPUT"
-          
-      outputs:
-        filtered_data: ${{ steps.filter-tag-digest.outputs.filtered_data }}
