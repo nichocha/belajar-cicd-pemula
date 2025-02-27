@@ -1,0 +1,13 @@
+# .github/workflows/deploy.yml
+name: Download and Use Artifact
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: my-artifact
+      - run: cat output.txt
