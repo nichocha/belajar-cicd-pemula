@@ -25,7 +25,8 @@ jobs:
   list-tags-with-digests:
     runs-on: ubuntu-latest
     outputs:
-      tag_digest_list: ${{ steps.filter-tag-digest.outputs.filtered_data }}
+      tag_digest_list: ${{ steps.fetch-tags.outputs.ecr_data }}
+      filtered_data: ${{ steps.filter-tag-digest.outputs.filtered_data }}
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -85,6 +86,14 @@ jobs:
     environment:
       name: approval-1
     steps:
+      - name: Show Docker Images List and Destination Image Digest
+        run: |
+          echo "### Docker Images List (Sorted by Date, Latest First) ###"
+          echo '${{ needs.list-tags-with-digests.outputs.tag_digest_list }}' | jq
+          
+          echo "### Destination Image Digest ###"
+          echo '${{ needs.list-tags-with-digests.outputs.filtered_data }}' | jq
+          
       - name: Waiting for Approval 1
         run: echo "Image requires manual approval before proceeding."
 
@@ -94,6 +103,14 @@ jobs:
     environment:
       name: approval-2
     steps:
+      - name: Show Docker Images List and Destination Image Digest
+        run: |
+          echo "### Docker Images List (Sorted by Date, Latest First) ###"
+          echo '${{ needs.list-tags-with-digests.outputs.tag_digest_list }}' | jq
+          
+          echo "### Destination Image Digest ###"
+          echo '${{ needs.list-tags-with-digests.outputs.filtered_data }}' | jq
+          
       - name: Waiting for Approval 2
         run: echo "Image requires manual approval before proceeding."
 
