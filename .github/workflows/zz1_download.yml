@@ -10,4 +10,5 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: my-artifact
+          github-token: ${{ secrets.PAT_GITHUB }} # token with actions:read permissions on target repo
       - run: cat output.txt
