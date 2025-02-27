@@ -20,6 +20,8 @@ on:
       docker_digest:
         description: 'Docker Image Digest:'
         required: true
+      
+run-name: "Push ECR Image: ${{ github.event.inputs.repo }} - Tag: ${{ github.event.inputs.docker_tag }}"
 
 jobs:
   list-tags-with-digests:
