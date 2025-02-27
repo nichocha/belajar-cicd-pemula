@@ -38,15 +38,27 @@ jobs:
         id: fetch-tags
         run: |          
           REPO_NAME="${{ github.event.inputs.repo }}"
-          echo "Fetching tags, digests, and push dates for repository: $REPO_NAME"
+          DOCKER_TAG="${{ github.event.inputs.docker_tag }}"
+          DOCKER_DIGEST="${{ github.event.inputs.docker_digest }}"
+          
+          echo "Filtering images in repository: $REPO_NAME with Tag: $DOCKER_TAG and Digest: $DOCKER_DIGEST"
 
           TAG_DIGEST_LIST=$(aws ecr describe-images --repository-name "$REPO_NAME" \
             --query "sort_by(imageDetails, &imagePushedAt)[*].{Tag: imageTags[0], Digest: imageDigest, Date: imagePushedAt}" \
             --output json | jq 'reverse')
 
-          echo "Available Tags (Sorted by Date, Latest First):"
-          echo "$TAG_DIGEST_LIST" | jq
+          FILTERED_RESULT=$(echo "$TAG_DIGEST_LIST" | jq -c --arg tag "$DOCKER_TAG" --arg digest "$DOCKER_DIGEST" \
+            '.[] | select(.Tag == $tag and .Digest == $digest)')
 
-          # Save to GitHub Actions output (must be single-line)
-          ECR_DATA_ESCAPED=$(echo "$TAG_DIGEST_LIST" | jq -c)
-          echo "ecr_data=$ECR_DATA_ESCAPED" >> "$GITHUB_OUTPUT"
+          if [ -z "$FILTERED_RESULT" ]; then
+            echo "No matching tag and digest found."
+            exit 1
+          fi
+
+          echo "Matching entry found:"
+          echo "$FILTERED_RESULT" | jq
+
+          echo "filtered_data=$FILTERED_RESULT" >> "$GITHUB_OUTPUT"
+          
+    outputs:
+      filtered_data: ${{ steps.filter-tag-digest.outputs.filtered_data }}
